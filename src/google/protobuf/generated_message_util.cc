@@ -793,8 +793,13 @@ void InitSCCImpl(SCCInfoBase* scc) {
   // Either the default in case no initialization is running or the id of the
   // thread that is currently initializing.
 #ifndef GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP
+#ifndef SCORPIO
   static std::atomic<std::thread::id> runner;
   auto me = std::this_thread::get_id();
+#else
+    static int runner;
+    auto me = 1;
+#endif
 #else
   // This is a lightweight replacement for std::thread::id. std::thread does not
   // work on Windows XP SP2 with the latest VC++ libraries, because it utilizes
@@ -803,6 +808,7 @@ void InitSCCImpl(SCCInfoBase* scc) {
   auto me = ::GetCurrentThreadId();
 #endif  // #ifndef GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP
 
+#ifndef SCORPIO
   // This will only happen because the constructor will call InitSCC while
   // constructing the default instance.
   if (runner.load(std::memory_order_relaxed) == me) {
@@ -812,13 +818,22 @@ void InitSCCImpl(SCCInfoBase* scc) {
              SCCInfoBase::kRunning);
     return;
   }
+#endif
   InitProtobufDefaults();
   mu.Lock();
+#ifndef SCORPIO
   runner.store(me, std::memory_order_relaxed);
+#else
+  //runner.store(me, 5);
+#endif
   InitSCC_DFS(scc);
 
 #ifndef GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP
+#ifndef SCORPIO
   runner.store(std::thread::id{}, std::memory_order_relaxed);
+#else
+  //runner.store(-1, std::memory_order_relaxed);
+#endif
 #else
   runner.store(-1, std::memory_order_relaxed);
 #endif  // #ifndef GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP

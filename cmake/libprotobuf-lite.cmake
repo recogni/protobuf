@@ -68,6 +68,7 @@ if(protobuf_LINK_LIBATOMIC)
   target_link_libraries(libprotobuf-lite atomic)
 endif()
 target_include_directories(libprotobuf-lite PUBLIC ${protobuf_source_dir}/src)
+
 if(MSVC AND protobuf_BUILD_SHARED_LIBS)
   target_compile_definitions(libprotobuf-lite
     PUBLIC  PROTOBUF_USE_DLLS

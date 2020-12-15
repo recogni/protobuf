@@ -96,15 +96,27 @@ class PROTOBUF_EXPORT CriticalSectionLock {
 class GOOGLE_PROTOBUF_CAPABILITY("mutex") PROTOBUF_EXPORT WrappedMutex {
  public:
   WrappedMutex() = default;
-  void Lock() GOOGLE_PROTOBUF_ACQUIRE() { mu_.lock(); }
-  void Unlock() GOOGLE_PROTOBUF_RELEASE() { mu_.unlock(); }
+  void Lock() GOOGLE_PROTOBUF_ACQUIRE()
+  {
+#ifndef SCORPIO
+      mu_.lock();
+#endif
+  }
+  void Unlock() GOOGLE_PROTOBUF_RELEASE()
+  {
+#ifndef SCORPIO
+  mu_.unlock();
+#endif
+  }
   // Crash if this Mutex is not held exclusively by this thread.
   // May fail to crash when it should; will never crash when it should not.
   void AssertHeld() const {}
 
  private:
 #ifndef GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP
+#ifndef SCORPIO
   std::mutex mu_;
+#endif
 #else  // ifndef GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP
   CriticalSectionLock mu_;
 #endif  // #ifndef GOOGLE_PROTOBUF_SUPPORT_WINDOWS_XP

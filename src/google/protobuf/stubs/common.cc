@@ -45,7 +45,11 @@
 #include <windows.h>
 #define snprintf _snprintf    // see comment in strutil.cc
 #elif defined(HAVE_PTHREAD)
+#ifndef SCORPIO
 #include <pthread.h>
+#else
+#include "pthread.h"
+#endif
 #else
 #error "No suitable threading library available."
 #endif
@@ -168,11 +172,13 @@ void DefaultLogHandler(LogLevel level, const char* filename, int line,
   }
   static const char* level_names[] = { "INFO", "WARNING", "ERROR", "FATAL" };
 
+#ifndef SCORPIO
   // We use fprintf() instead of cerr because we want this to work at static
   // initialization time.
   fprintf(stderr, "[libprotobuf %s %s:%d] %s\n",
           level_names[level], filename, line, message.c_str());
   fflush(stderr);  // Needed on MSVC.
+#endif //SCORPIO
 }
 #endif
 

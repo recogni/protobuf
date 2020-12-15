@@ -40,10 +40,16 @@ namespace google {
 namespace protobuf {
 namespace internal {
 
+#ifndef SCORPIO
 using once_flag = std::once_flag;
+#else
+using once_flag = int;
+#endif
 template <typename... Args>
 void call_once(Args&&... args ) {
+#ifndef SCORPIO
   std::call_once(std::forward<Args>(args)...);
+#endif
 }
 
 }  // namespace internal
